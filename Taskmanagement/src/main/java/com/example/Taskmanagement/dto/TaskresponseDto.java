@@ -7,10 +7,10 @@ import com.example.Taskmanagement.Model.TaskStatus;
 public class TaskresponseDto{
 
     private String id;
-    private String title;
-    private String description;
-    private TaskStatus status;
+    private String Title;
+    private String Description;
+    private TaskStatus Status;
     private LocalDate dueDate;
 
-    // getters and setters
+    
 }

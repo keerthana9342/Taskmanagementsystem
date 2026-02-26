@@ -3,15 +3,14 @@ import java.time.LocalDate;
 
 import com.example.Taskmanagement.Model.TaskStatus;
 
-public class TaskrequestDto {
-    public class TaskRequestDTO {
 
-    private String title;
-    private String description;
-    private TaskStatus status;
+    public class TaskrequestDto {
+
+    private String Title;
+    private String Description;
+    private TaskStatus Status;
     private LocalDate dueDate;
 
-    // getters and setters
+    
 }
 
-}

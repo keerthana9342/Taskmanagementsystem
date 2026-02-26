@@ -1,5 +1,9 @@
 package com.example.Taskmanagement.Exception;
 
-public class ResourceNotFoundException {
+public class ResourceNotFoundException extends RuntimeException {
 
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
 }
+
