@@ -1,57 +1,114 @@
 package com.example.Taskmanagement.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.example.Taskmanagement.Model.Task;
-import com.example.Taskmanagement.Repository.Taskrepo;
 
+import org.springframework.stereotype.Service;
+
+import com.example.Taskmanagement.Exception.ResourceNotFoundException;
+import com.example.Taskmanagement.Model.Task;
+import com.example.Taskmanagement.Model.TaskStatus;
+import com.example.Taskmanagement.Repository.Taskrepo;
+import com.example.Taskmanagement.dto.TaskrequestDto;
+import com.example.Taskmanagement.dto.TaskresponseDto;
+import com.example.Util.TaskMapper;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 public class Taskserviceimpl implements Taskservice {
 
-    @Autowired
-    private Taskrepo taskrepo;
+    public final Taskrepo taskrepo;
 
-    // Get all tasks
-    public List<Task> getalltask() {
-        return taskrepo.findAll();
+    // Constructor Injection
+    public Taskserviceimpl(Taskrepo taskrepo) {
+        this.taskrepo = taskrepo;
     }
 
-    // Add task
-    public Task addtask(Task task) {
-        return taskrepo.save(task);
-    }
 
-    // Get task by id
-    public Task gettaskbyid(String id) {
-        return taskrepo.findById(id).orElse(null);
-    }
+    @Override
+    public List<TaskresponseDto> getalltask() {
 
-    // Update task
-    public Task updateTask(String id, Task task) {
-        Task existingTask = taskrepo.findById(id).orElse(null);
+        List<Task> taskList = taskrepo.findAll();
+        List<TaskresponseDto> responseList = new ArrayList<>();
 
-        if (existingTask != null) {
-            existingTask.setTitle(task.getTitle());
-            existingTask.setDescription(task.getDescription());
-            existingTask.setStatus(task.getStatus());
-            existingTask.setDuedate(task.getDuedate());
-            return taskrepo.save(existingTask);
+        for (Task task : taskList) {
+            responseList.add(TaskMapper.toDTO(task));
         }
 
-        throw new RuntimeException("Task not found with id: " + id);
+        return responseList;
     }
 
-    // Delete task
     
-    public void deletetask(String id) {
-        taskrepo.deleteById(id);
+    @Override
+    public TaskresponseDto addtask(TaskrequestDto dto) {
+
+        Task task = TaskMapper.toEntity(dto);
+        Task savedTask = taskrepo.save(task);
+
+        return TaskMapper.toDTO(savedTask);
     }
 
-    // Get tasks by status
-    public List<Task> getviewbystatus(String status) {
-        return taskrepo.findByStatus(status);
+    //  Get Task By ID
+    @Override
+    public TaskresponseDto gettaskbyid(String id) {
+
+        Task task = taskrepo.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Task not found with id: " + id));
+
+        return TaskMapper.toDTO(task);
     }
+
+    //  Delete Task
+    @Override
+    public void deletetask(String id) {
+
+        Task task = taskrepo.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Task not found with id: " + id));
+
+        taskrepo.delete(task);
+    }
+
+    // Update Task
+    public TaskresponseDto updateTask(String id, TaskrequestDto dto) {
+
+        Task existingTask = taskrepo.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Task not found with id: " + id));
+
+        existingTask.setTitle(dto.getTitle());
+        existingTask.setDescription(dto.getDescription());
+        existingTask.setStatus(dto.getStatus());
+        existingTask.setDueDate(dto.getDueDate());
+
+        Task updatedTask = taskrepo.save(existingTask);
+
+        return TaskMapper.toDTO(updatedTask);
+    }
+
+    
+
+    @Override
+public List<TaskresponseDto> getviewbystatus(TaskStatus status) {
+
+    System.out.println("Status received: " + status);
+
+    List<Task> tasks = taskrepo.findByStatus(status);
+
+    System.out.println("Tasks found: " + tasks.size());
+
+    return tasks.stream().map(task -> {
+        TaskresponseDto dto = new TaskresponseDto();
+        dto.setId(task.getId());
+        dto.setTitle(task.getTitle());
+        dto.setDescription(task.getDescription());
+        dto.setStatus(task.getStatus());
+        dto.setDueDate(task.getDueDate());
+        return dto;
+    }).toList();
+}
+    
 }

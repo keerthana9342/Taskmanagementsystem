@@ -1,16 +1,15 @@
 package com.example.Taskmanagement.dto;
 
-import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 import com.example.Taskmanagement.Model.TaskStatus;
+import lombok.Data;
 
-public class TaskresponseDto{
+@Data
+public class TaskresponseDto {
 
     private String id;
-    private String Title;
-    private String Description;
-    private TaskStatus Status;
-    private LocalDate dueDate;
-
-    
+    private String title;
+    private String description;
+    private TaskStatus status;
+    private LocalDateTime dueDate;
 }

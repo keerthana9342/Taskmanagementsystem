@@ -1,20 +1,27 @@
 package com.example.Taskmanagement.Service;
 import java.util.List;
+
 import com.example.Taskmanagement.Model.Task;
+import com.example.Taskmanagement.Model.TaskStatus;
+import com.example.Taskmanagement.dto.TaskrequestDto;
+import com.example.Taskmanagement.dto.TaskresponseDto;
 
 public interface Taskservice {
-   public Task addtask(Task task);
+    
+   public TaskresponseDto addtask(TaskrequestDto task);
 
-    public List<Task> getalltask();
+    public List<TaskresponseDto> getalltask();
     
 
-    public Task gettaskbyid(String id) ;
+    public TaskresponseDto gettaskbyid(String id) ;
 
-    public Task updateTask(String id, Task task) ;
+    public TaskresponseDto updateTask(String id, TaskrequestDto dto);
 
     public void deletetask(String id);
     
 
-    public List<Task> getviewbystatus(String status);
+    //public List<TaskresponseDto> getviewbystatus1(TaskStatus status);
+
+    List<TaskresponseDto> getviewbystatus(TaskStatus status);
 
 }

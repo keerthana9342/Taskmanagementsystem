@@ -2,6 +2,9 @@ package com.example.Taskmanagement.Controller;
 
 import java.util.List;
 import com.example.Taskmanagement.Model.Task;
+import com.example.Taskmanagement.Model.TaskStatus;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,8 +13,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.Taskmanagement.Service.Taskservice
-;
+import com.example.Taskmanagement.Service.Taskservice;
+import com.example.Taskmanagement.dto.TaskrequestDto;
+import com.example.Taskmanagement.dto.TaskresponseDto;
+
+
 
 @RestController
 @RequestMapping("/api/task")
@@ -23,40 +29,40 @@ public class Taskcontroller {
         this.taskservice = taskservice;
     }
 
-    // Add task
+    // Add Task
     @PostMapping("/add")
-    public Task addtask(@RequestBody Task task) {
-        return taskservice.addtask(task);
-    }
+    public ResponseEntity<TaskresponseDto> addTask(@RequestBody TaskrequestDto dto) {
+    return ResponseEntity.ok(taskservice.addtask(dto));
+}
 
-    // Get all tasks
+    // Get All
     @GetMapping("/get")
-    public List<Task> getalltask() {   
+    public List<TaskresponseDto> getalltask() {
         return taskservice.getalltask();
     }
 
-
-    // Get task by id
+    // Get By ID
     @GetMapping("/get/{id}")
-    public Task gettaskbyid(@PathVariable String id) {
+    public TaskresponseDto gettaskbyid(@PathVariable String id) {
         return taskservice.gettaskbyid(id);
     }
 
-    // Update task
+    // Update
     @PutMapping("/update/{id}")
-    public Task updatetask(@PathVariable String id, @RequestBody Task task) {
-        return taskservice.updateTask(id, task);
+    public TaskresponseDto updatetask(@PathVariable String id,
+                                      @RequestBody TaskrequestDto dto) {
+        return taskservice.updateTask(id, dto);
     }
 
-    // Delete task
+    // Delete
     @DeleteMapping("/delete/{id}")
     public void deletetask(@PathVariable String id) {
         taskservice.deletetask(id);
     }
 
-    // Get tasks by status
+    // Get By Status
     @GetMapping("/get/view/{status}")
-    public List<Task> getviewbystatus(@PathVariable String status) {
+    public List<TaskresponseDto> getviewbystatus(@PathVariable TaskStatus status) {
         return taskservice.getviewbystatus(status);
     }
 }
