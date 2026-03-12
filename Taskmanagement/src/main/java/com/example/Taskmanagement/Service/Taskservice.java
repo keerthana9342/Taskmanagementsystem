@@ -1,27 +1,21 @@
-package com.example.Taskmanagement.Service;
+package com.example.taskmanagement.Service;
+
 import java.util.List;
 
-import com.example.Taskmanagement.Model.Task;
-import com.example.Taskmanagement.Model.TaskStatus;
-import com.example.Taskmanagement.dto.TaskrequestDto;
-import com.example.Taskmanagement.dto.TaskresponseDto;
+import com.example.taskmanagement.Model.TaskStatus;
+import com.example.taskmanagement.dto.Request.TaskRequestDto;
 
-public interface Taskservice {
-    
-   public TaskresponseDto addtask(TaskrequestDto task);
+public interface TaskService {
 
-    public List<TaskresponseDto> getalltask();
-    
+    List<com.example.taskmanagement.dto.Response.TaskResponseDto> getAllTasks(int page, int size);
 
-    public TaskresponseDto gettaskbyid(String id) ;
+    com.example.taskmanagement.dto.Response.TaskResponseDto addTask(TaskRequestDto dto);
 
-    public TaskresponseDto updateTask(String id, TaskrequestDto dto);
+    com.example.taskmanagement.dto.Response.TaskResponseDto getTaskById(String id);
 
-    public void deletetask(String id);
-    
+    String deleteTask(String id);
 
-    //public List<TaskresponseDto> getviewbystatus1(TaskStatus status);
+    com.example.taskmanagement.dto.Response.TaskResponseDto updateTask(String id, TaskRequestDto dto);
 
-    List<TaskresponseDto> getviewbystatus(TaskStatus status);
-
+    List<com.example.taskmanagement.dto.Response.TaskResponseDto> getViewByStatus(TaskStatus status);
 }
