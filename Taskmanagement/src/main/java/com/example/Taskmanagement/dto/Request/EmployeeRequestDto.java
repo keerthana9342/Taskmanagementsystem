@@ -13,6 +13,18 @@ public class EmployeeRequestDto {
     private String email;
     @NotBlank(message = "Password is required")
     private String password;
+    @NotBlank
+    private String firstName;
+    private String lastName;
+    private String roleId;
+    private String departmentId;
+    private String phone;
+    private String designation;
+    private String status;
+    private String createdBy;
+    private String ProjectId;
+    
+    
 }
 
 

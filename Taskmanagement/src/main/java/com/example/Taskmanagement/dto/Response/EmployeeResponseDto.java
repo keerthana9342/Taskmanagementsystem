@@ -1,15 +1,18 @@
 package com.example.taskmanagement.dto.Response;
-import java.util.List;
 import lombok.Data;
 
 @Data
 public class EmployeeResponseDto {
     private String employeeId;
     private String username;
+    private String firstName;
+    private String lastName;
     private String email;
-    private List<String> taskIds;
+    private String roleId;
+    private String departmentId;
+    private String phone;
+    private String designation;
+    private String status;
+    private String ProjectId;
     
-
 }
-
-

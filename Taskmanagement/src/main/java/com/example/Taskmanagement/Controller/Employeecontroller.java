@@ -1,8 +1,11 @@
 package com.example.taskmanagement.Controller;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,19 +20,18 @@ import com.example.taskmanagement.dto.APIresponse;
 import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.AssignTaskRequestDto;
 import com.example.taskmanagement.dto.Request.EmployeeRequestDto;
-import com.example.taskmanagement.dto.Request.LoginRequestDto;
-import com.example.taskmanagement.dto.Response.AuthResponseDto;
 import com.example.taskmanagement.dto.Response.EmployeeResponseDto;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/employee")
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class Employeecontroller {
 
     @Autowired
     private EmployeeService employeeService;
-
+     
     // Add Employee
     @PostMapping("/add")
     public ResponseEntity<EmployeeResponseDto> addEmployee(@Valid @RequestBody EmployeeRequestDto dto) {
@@ -62,18 +64,12 @@ public ResponseEntity<APIresponse<PageResponse<EmployeeResponseDto>>> getAllEmpl
 
         return ResponseEntity.ok("Tasks assigned successfully");
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequest) {
-        return ResponseEntity.ok(employeeService.login(loginRequest));
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponseDto> register(@Valid @RequestBody EmployeeRequestDto registerRequest) {
-        return ResponseEntity.ok(employeeService.register(registerRequest));
-    }
-
+    
 }
+
+    
+
+
 
 
 

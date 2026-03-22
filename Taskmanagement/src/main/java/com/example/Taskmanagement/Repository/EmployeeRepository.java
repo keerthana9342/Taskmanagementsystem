@@ -1,13 +1,12 @@
 package com.example.taskmanagement.Repository;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import com.example.taskmanagement.Model.Employee;
+import java.util.Optional;
+import java.util.List;
+
 
 public interface EmployeeRepository extends MongoRepository<Employee, String> {
-        Employee findByEmail(String email);
-        Employee findByEmployeeId(String employeeId);
-
-
+    Optional<Employee> findByEmail(String email);
+    Optional<Employee> findByEmployeeId(String employeeId);
+    List<Employee> findByProjectId(String projectId);
 }
-
-
-

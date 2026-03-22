@@ -1,6 +1,6 @@
 package com.example.taskmanagement.Service.implementation;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -40,23 +40,37 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.jwtUtil = jwtUtil;
     }
 
-    // Add Employee
     @Override
     public EmployeeResponseDto addEmployee(EmployeeRequestDto dto) {
-
-        Employee employee = EmployeeMapper.toEntity(dto);
-
-        employee.setPassword(passwordEncoder.encode(employee.getPassword()));
+        Employee employee = new Employee();
+        employee.setEmployeeId(dto.getEmployeeId());
+        employee.setUsername(dto.getUsername());
+        employee.setFirstName(dto.getFirstName());
+        employee.setLastName(dto.getLastName());
+        employee.setEmail(dto.getEmail());
+        employee.setPassword(passwordEncoder.encode(dto.getPassword()));
+        employee.setPhone(dto.getPhone());
+        employee.setRoleId(dto.getRoleId());
+        employee.setDepartmentId(dto.getDepartmentId());
+        employee.setDesignation(dto.getDesignation());
+        employee.setStatus(dto.getStatus());
+        employee.setCreatedAt(LocalDate.now());
+        employee.setDeleted(false);
 
         Employee saved = employeeRepository.save(employee);
-
         return EmployeeMapper.toDto(saved);
     }
+    @Override
+   public List<EmployeeResponseDto> getEmployeesByProjectId(String projectId) {
+      List<Employee> employees = employeeRepository.findByProjectId(projectId);
 
-    // Get Employees with Pagination
+      return employees.stream()
+            .map(EmployeeMapper::toDto)
+            .toList();
+}
+
     @Override
     public PageResponse<EmployeeResponseDto> getAllEmployees(Pageable pageable) {
-
         Page<Employee> page = employeeRepository.findAll(pageable);
 
         List<EmployeeResponseDto> employees = page.getContent()
@@ -73,36 +87,31 @@ public class EmployeeServiceImpl implements EmployeeService {
         );
     }
 
-    // Assign Tasks
-    @Override
-    public Employee assignTasks(String employeeId, List<TaskRequestDto> taskDtos) {
+   @Override
+public Employee assignTasks(String employeeId, List<TaskRequestDto> taskDtos) {
+    Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    for (TaskRequestDto dto : taskDtos) {
+        Task task = new Task();
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setStatus(dto.getStatus());
+        task.setDueDate(dto.getDueDate());
+        task.setEmployeeId(employee.getEmployeeId());
 
-        List<Task> tasks = new ArrayList<>();
-
-        for (TaskRequestDto dto : taskDtos) {
-
-            Task task = new Task();
-            task.setTitle(dto.getTitle());
-            task.setDescription(dto.getDescription());
-            task.setStatus(dto.getStatus());
-            task.setDueDate(dto.getDueDate());
-
-            tasks.add(taskrepo.save(task));
-        }
-
-        employee.setTasks(tasks);
-
-        return employeeRepository.save(employee);
+        taskrepo.save(task);
     }
+
+    return employee;
+}
 
     @Override
     public AuthResponseDto login(LoginRequestDto loginRequest) {
-        Employee employee = employeeRepository.findByEmail(loginRequest.getEmail());
+        Employee employee = employeeRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
         
-        if (employee == null || !passwordEncoder.matches(loginRequest.getPassword(), employee.getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.getPassword(), employee.getPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
         
@@ -120,12 +129,13 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public AuthResponseDto register(EmployeeRequestDto registerRequest) {
-        if (employeeRepository.findByEmail(registerRequest.getEmail()) != null) {
+        if (employeeRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
         
         EmployeeResponseDto employeeResponse = addEmployee(registerRequest);
-        Employee employee = employeeRepository.findByEmail(registerRequest.getEmail());
+        Employee employee = employeeRepository.findByEmail(registerRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Employee not found after registration"));
         
         String token = jwtUtil.generateToken(employee.getEmail());
         

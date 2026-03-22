@@ -2,7 +2,6 @@ package com.example.taskmanagement.Service;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.example.taskmanagement.Model.Employee;
@@ -24,4 +23,6 @@ public interface EmployeeService {
     AuthResponseDto login(LoginRequestDto loginRequest);
     
     AuthResponseDto register(EmployeeRequestDto registerRequest);
+    
+    List<EmployeeResponseDto> getEmployeesByProjectId(String projectId);
 }

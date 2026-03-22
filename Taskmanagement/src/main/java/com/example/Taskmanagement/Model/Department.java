@@ -6,18 +6,15 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 @Data
-@Document(collection = "roles")
-public class Role {
-    @Id
+@Document(collection = "departments")
+public class Department {
+@Id
     private String id;
-    private String roleName;
+    private String departmentName;
     private String description;
     private String createdBy;
     private String createdAt;
     private String updatedAt;
-
-
-
-
+    private  String updatedBy;
 
 }
