@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,15 +56,24 @@ public ResponseEntity<APIresponse<PageResponse<EmployeeResponseDto>>> getAllEmpl
 
     return ResponseEntity.ok(response);
 }
-   @PutMapping("/assign/{employeeId}")
-    public ResponseEntity<String> assignTasks(
-            @PathVariable String employeeId,
-            @RequestBody AssignTaskRequestDto request) {
+@PutMapping("/update/{employeeId}")
+public ResponseEntity<?> updateEmployee(
+        @PathVariable String employeeId,
+        @RequestBody EmployeeRequestDto dto) {
 
-        employeeService.assignTasks(employeeId, request.getTasks());
+    return ResponseEntity.ok(employeeService.updateEmployee(employeeId, dto));
+}
+  
+    @DeleteMapping("/delete/{employeeId}")
+public ResponseEntity<?> deleteEmployee(@PathVariable String employeeId) {
+    return ResponseEntity.ok(employeeService.deleteEmployee(employeeId));
+}
+@DeleteMapping("/hard-delete/{employeeId}")
+public ResponseEntity<?> hardDeleteEmployee(@PathVariable String employeeId) {
+    employeeService.hardDeleteEmployee(employeeId);
+    return ResponseEntity.ok("Employee permanently deleted");
+}
 
-        return ResponseEntity.ok("Tasks assigned successfully");
-    }
     
 }
 

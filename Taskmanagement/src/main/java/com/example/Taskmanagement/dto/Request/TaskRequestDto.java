@@ -23,8 +23,13 @@ public class TaskRequestDto {
     @NotNull(message = "Due date is required")
     @FutureOrPresent(message = "Due date must be present or future")
     private LocalDateTime dueDate;
-    private String employeeId;
+    @NotBlank(message =" employee Id is required" )
+    
     private String projectId;
+    private String remarks;
+    private String milestoneId;
+    @NotNull(message = "AssignedTo is required")
+    private AssignedEmployeeDto assignedTo; 
 
 }
 

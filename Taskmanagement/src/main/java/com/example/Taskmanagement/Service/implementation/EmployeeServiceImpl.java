@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 import com.example.Util.EmployeeMapper;
 import com.example.taskmanagement.Config.JwtUtil;
 import com.example.taskmanagement.Model.Employee;
+import com.example.taskmanagement.Model.Project;
 import com.example.taskmanagement.Model.Task;
 import com.example.taskmanagement.Repository.EmployeeRepository;
+import com.example.taskmanagement.Repository.ProjectRepository;
 import com.example.taskmanagement.Repository.TaskRepository;
+import com.example.taskmanagement.Repository.UserRepository;
 import com.example.taskmanagement.Service.EmployeeService;
 import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.EmployeeRequestDto;
@@ -28,16 +31,22 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final TaskRepository taskrepo;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
     private final JwtUtil jwtUtil;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                TaskRepository taskrepo,
                                PasswordEncoder passwordEncoder,
+                                UserRepository userRepository,
+                                ProjectRepository projectRepository,
                                JwtUtil jwtUtil) {
         this.employeeRepository = employeeRepository;
         this.taskrepo = taskrepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.projectRepository = projectRepository;
+        this.userRepository = userRepository;   
     }
 
     @Override
@@ -60,14 +69,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee saved = employeeRepository.save(employee);
         return EmployeeMapper.toDto(saved);
     }
-    @Override
-   public List<EmployeeResponseDto> getEmployeesByProjectId(String projectId) {
-      List<Employee> employees = employeeRepository.findByProjectId(projectId);
-
-      return employees.stream()
-            .map(EmployeeMapper::toDto)
-            .toList();
-}
 
     @Override
     public PageResponse<EmployeeResponseDto> getAllEmployees(Pageable pageable) {
@@ -86,25 +87,73 @@ public class EmployeeServiceImpl implements EmployeeService {
                 page.getTotalPages()
         );
     }
+    @Override
+public String deleteEmployee(String employeeId) {
 
-   @Override
-public Employee assignTasks(String employeeId, List<TaskRequestDto> taskDtos) {
     Employee employee = employeeRepository.findById(employeeId)
-            .orElseThrow(() -> new RuntimeException("Employee not found"));
+            .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
 
-    for (TaskRequestDto dto : taskDtos) {
-        Task task = new Task();
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        task.setStatus(dto.getStatus());
-        task.setDueDate(dto.getDueDate());
-        task.setEmployeeId(employee.getEmployeeId());
+    // Soft delete
+    employee.setDeleted(true);
 
-        taskrepo.save(task);
+    employeeRepository.save(employee);
+
+    return "Employee deleted successfully";
+}
+@Override
+public EmployeeResponseDto updateEmployee(String employeeId, EmployeeRequestDto dto) {
+
+    Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+
+    // Update fields
+    employee.setUsername(dto.getUsername());
+    employee.setFirstName(dto.getFirstName());
+    employee.setLastName(dto.getLastName());
+    employee.setEmail(dto.getEmail());
+    employee.setPhone(dto.getPhone());
+    employee.setRoleId(dto.getRoleId());
+    employee.setDepartmentId(dto.getDepartmentId());
+    employee.setDesignation(dto.getDesignation());
+    employee.setStatus(dto.getStatus());
+    
+
+    //  Update password only if provided
+    if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+        employee.setPassword(passwordEncoder.encode(dto.getPassword()));
     }
 
-    return employee;
+    Employee updatedEmployee = employeeRepository.save(employee);
+
+    return EmployeeMapper.toDto(updatedEmployee);
 }
+@Override
+public void hardDeleteEmployee(String employeeId) {
+
+    Employee employee = employeeRepository.findById(employeeId)
+            .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+
+    //  1. Delete User (correct way)
+    userRepository.findByEmployeeId(employeeId)
+            .ifPresent(userRepository::delete);
+
+    //  2. Delete Tasks
+    taskrepo.deleteByAssignedToEmployeeId(employeeId);
+
+    //  3. Remove employee from projects
+    List<Project> projects = projectRepository.findAll();
+
+    for (Project project : projects) {
+        if (project.getEmployeeIds() != null) {
+            project.getEmployeeIds().remove(employeeId);
+            projectRepository.save(project);
+        }
+    }
+
+    // 4. Delete Employee
+    employeeRepository.delete(employee);
+}
+
 
     @Override
     public AuthResponseDto login(LoginRequestDto loginRequest) {
@@ -147,5 +196,6 @@ public Employee assignTasks(String employeeId, List<TaskRequestDto> taskDtos) {
             token,
             "Registration successful"
         );
-    }
+    
+}
 }

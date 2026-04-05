@@ -13,6 +13,6 @@ public class EmployeeResponseDto {
     private String phone;
     private String designation;
     private String status;
-    private String ProjectId;
+    
     
 }

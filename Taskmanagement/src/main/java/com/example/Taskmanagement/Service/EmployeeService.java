@@ -8,7 +8,6 @@ import com.example.taskmanagement.Model.Employee;
 import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.EmployeeRequestDto;
 import com.example.taskmanagement.dto.Request.LoginRequestDto;
-import com.example.taskmanagement.dto.Request.TaskRequestDto;
 import com.example.taskmanagement.dto.Response.AuthResponseDto;
 import com.example.taskmanagement.dto.Response.EmployeeResponseDto;
 
@@ -18,11 +17,13 @@ public interface EmployeeService {
 
     PageResponse<EmployeeResponseDto> getAllEmployees(Pageable pageable);
 
-    Employee assignTasks(String employeeId, List<TaskRequestDto> taskDtos);
 
     AuthResponseDto login(LoginRequestDto loginRequest);
     
     AuthResponseDto register(EmployeeRequestDto registerRequest);
     
-    List<EmployeeResponseDto> getEmployeesByProjectId(String projectId);
+    
+    String deleteEmployee(String employeeId);//soft delete
+    EmployeeResponseDto updateEmployee(String employeeId, EmployeeRequestDto dto);
+    void hardDeleteEmployee(String employeeId);
 }

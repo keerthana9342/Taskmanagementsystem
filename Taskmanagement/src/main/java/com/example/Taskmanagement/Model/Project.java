@@ -15,5 +15,6 @@ public class Project {
     private String projectName;
     private boolean isActive;
     private List<String> employeeIds;
+    private List<MileStone> mileStones;
     
 }

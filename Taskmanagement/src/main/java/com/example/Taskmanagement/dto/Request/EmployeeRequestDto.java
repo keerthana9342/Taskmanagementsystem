@@ -22,7 +22,7 @@ public class EmployeeRequestDto {
     private String designation;
     private String status;
     private String createdBy;
-    private String ProjectId;
+
     
     
 }

@@ -21,7 +21,7 @@ public class EmployeeMapper {
         employee.setDepartmentId(dto.getDepartmentId());
         employee.setDesignation(dto.getDesignation());
         employee.setStatus(dto.getStatus());
-        employee.setProjectId(dto.getProjectId());
+        
 
         return employee;
     }
@@ -40,7 +40,7 @@ public class EmployeeMapper {
         dto.setDepartmentId(employee.getDepartmentId());
         dto.setDesignation(employee.getDesignation());
         dto.setStatus(employee.getStatus());
-        dto.setProjectId(employee.getProjectId());
+        
          
         return dto;
     }

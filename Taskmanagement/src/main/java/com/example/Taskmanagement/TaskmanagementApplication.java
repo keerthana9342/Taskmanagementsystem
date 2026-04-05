@@ -8,5 +8,6 @@ public class taskmanagementApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(taskmanagementApplication.class, args);
+		
 	}
 }
