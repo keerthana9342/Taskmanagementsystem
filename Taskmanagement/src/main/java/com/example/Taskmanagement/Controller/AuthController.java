@@ -9,10 +9,9 @@ import com.example.taskmanagement.dto.Request.LoginRequestDto;
 import com.example.taskmanagement.dto.Response.AuthResponseDto;
 
 import jakarta.validation.Valid;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final AuthService authService;

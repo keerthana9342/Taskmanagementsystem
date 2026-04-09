@@ -14,5 +14,4 @@ public class EmployeeResponseDto {
     private String designation;
     private String status;
     
-    
 }
