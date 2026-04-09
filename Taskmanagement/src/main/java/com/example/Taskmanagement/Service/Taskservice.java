@@ -1,13 +1,25 @@
 package com.example.taskmanagement.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.TaskRequestDto;
 import com.example.taskmanagement.dto.Response.TaskResponseDto;
 
 public interface TaskService {
 
-    List<TaskResponseDto> getAllTasks(int page, int size);
+   PageResponse<TaskResponseDto> getAllTasks(
+            String keyword,
+            String status,
+            String projectId,
+            String milestoneId,
+            String employeeId,
+            String designation,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            int page,
+            int size);  
 
     TaskResponseDto addTask(TaskRequestDto dto);
 

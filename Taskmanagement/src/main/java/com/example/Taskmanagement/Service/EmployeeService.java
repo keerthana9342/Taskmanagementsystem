@@ -1,10 +1,5 @@
 package com.example.taskmanagement.Service;
-
-import java.util.List;
-
 import org.springframework.data.domain.Pageable;
-
-import com.example.taskmanagement.Model.Employee;
 import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.EmployeeRequestDto;
 import com.example.taskmanagement.dto.Request.LoginRequestDto;
@@ -15,7 +10,15 @@ public interface EmployeeService {
 
     EmployeeResponseDto addEmployee(EmployeeRequestDto dto);
 
-    PageResponse<EmployeeResponseDto> getAllEmployees(Pageable pageable);
+
+        PageResponse<EmployeeResponseDto> getAllEmployees(
+            String keyword,
+            String status,
+            String departmentId,
+            String designation,
+            String roleId,
+            Pageable pageable);
+
 
 
     AuthResponseDto login(LoginRequestDto loginRequest);

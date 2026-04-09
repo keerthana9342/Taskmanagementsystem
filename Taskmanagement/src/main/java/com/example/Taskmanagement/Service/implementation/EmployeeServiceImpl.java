@@ -1,10 +1,13 @@
 package com.example.taskmanagement.Service.implementation;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +24,9 @@ import com.example.taskmanagement.Service.EmployeeService;
 import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.EmployeeRequestDto;
 import com.example.taskmanagement.dto.Request.LoginRequestDto;
-import com.example.taskmanagement.dto.Request.TaskRequestDto;
 import com.example.taskmanagement.dto.Response.AuthResponseDto;
 import com.example.taskmanagement.dto.Response.EmployeeResponseDto;
+import org.springframework.data.mongodb.core.query.Query;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -34,18 +37,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final JwtUtil jwtUtil;
+    private final MongoTemplate mongoTemplate;
 
     public EmployeeServiceImpl(EmployeeRepository employeeRepository,
                                TaskRepository taskrepo,
                                PasswordEncoder passwordEncoder,
                                 UserRepository userRepository,
                                 ProjectRepository projectRepository,
-                               JwtUtil jwtUtil) {
+                               JwtUtil jwtUtil,MongoTemplate mongoTemplate) {
         this.employeeRepository = employeeRepository;
         this.taskrepo = taskrepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.projectRepository = projectRepository;
+        this.mongoTemplate = mongoTemplate;
         this.userRepository = userRepository;   
     }
 
@@ -70,23 +75,73 @@ public class EmployeeServiceImpl implements EmployeeService {
         return EmployeeMapper.toDto(saved);
     }
 
-    @Override
-    public PageResponse<EmployeeResponseDto> getAllEmployees(Pageable pageable) {
-        Page<Employee> page = employeeRepository.findAll(pageable);
+@Override
+public PageResponse<EmployeeResponseDto> getAllEmployees(
+        String keyword,
+        String status,
+        String departmentId,
+        String designation,
+        String roleId,
+        Pageable pageable) {
 
-        List<EmployeeResponseDto> employees = page.getContent()
-                .stream()
-                .map(EmployeeMapper::toDto)
-                .toList();
+    Query query = new Query();
+    List<Criteria> criteriaList = new ArrayList<>();
 
-        return new PageResponse<>(
-                employees,
-                page.getNumber(),
-                page.getSize(),
-                page.getTotalElements(),
-                page.getTotalPages()
-        );
+    //  Search keyword
+    if (keyword != null && !keyword.trim().isEmpty()) {
+        criteriaList.add(new Criteria().orOperator(
+                Criteria.where("username").regex(keyword, "i"),
+                Criteria.where("firstName").regex(keyword, "i"),
+                Criteria.where("lastName").regex(keyword, "i"),
+                Criteria.where("email").regex(keyword, "i"),
+                Criteria.where("employeeId").regex(keyword, "i"),
+                Criteria.where("departmentId").regex(keyword, "i"),
+                Criteria.where("designation").regex(keyword, "i"),
+                Criteria.where("status").regex(keyword, "i"),
+                Criteria.where("roleId").regex(keyword, "i"),
+                Criteria.where("phone").regex(keyword, "i")
+        ));
     }
+
+    // Filters
+    if (status != null && !status.isEmpty()) {
+        criteriaList.add(Criteria.where("status").is(status));
+    }
+    if (departmentId != null && !departmentId.isEmpty()) {
+        criteriaList.add(Criteria.where("departmentId").is(departmentId));
+    }
+    if (designation != null && !designation.isEmpty()) {
+        criteriaList.add(Criteria.where("designation").is(designation));
+    }
+    if (roleId != null && !roleId.isEmpty()) {
+        criteriaList.add(Criteria.where("roleId").is(roleId));
+    }
+
+    //  Combine all criteria
+    if (!criteriaList.isEmpty()) {
+        query.addCriteria(new Criteria().andOperator(
+                criteriaList.toArray(new Criteria[0])));
+    }
+
+    //  Get total count
+    long total = mongoTemplate.count(query, Employee.class);
+
+    //  Apply pagination
+    query.with(pageable);
+    List<Employee> employees = mongoTemplate.find(query, Employee.class);
+
+    List<EmployeeResponseDto> employeeDtos = employees.stream()
+            .map(EmployeeMapper::toDto)
+            .toList();
+
+    return new PageResponse<>(
+            employeeDtos,
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            total,
+            (int) Math.ceil((double) total / pageable.getPageSize())
+    );
+}
     @Override
 public String deleteEmployee(String employeeId) {
 
@@ -198,4 +253,5 @@ public void hardDeleteEmployee(String employeeId) {
         );
     
 }
+
 }

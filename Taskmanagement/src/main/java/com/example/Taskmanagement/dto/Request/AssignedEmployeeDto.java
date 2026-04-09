@@ -13,6 +13,7 @@ public class AssignedEmployeeDto {
     private Boolean isActive;
 
     private String designation;
+    
 }
 
 

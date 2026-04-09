@@ -8,7 +8,7 @@ import com.example.taskmanagement.dto.Response.MileStoneResponseDto;
 
 public class MileStoneMapper {
 
-    // ✅ Milestone Mapper
+    // Milestone Mapper
     public static MileStoneResponseDto toDto(MileStone milestone) {
         MileStoneResponseDto dto = new MileStoneResponseDto();
         dto.setMilestoneId(milestone.getMilestoneId());
@@ -22,7 +22,7 @@ public class MileStoneMapper {
         return dto;
     }
 
-    // ✅ List Mapper
+    // List Mapper
     public static List<MileStoneResponseDto> toDtoList(List<MileStone> milestones) {
         if (milestones == null) {
             return new ArrayList<>();

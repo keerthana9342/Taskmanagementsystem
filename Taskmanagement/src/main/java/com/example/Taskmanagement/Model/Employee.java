@@ -1,5 +1,6 @@
 package com.example.taskmanagement.Model;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -32,7 +33,7 @@ public class Employee {
     private String phone;
     private String designation;
     private String status;
-    private String lastLogin;
+    private LocalDateTime lastLogin;
     private boolean isDeleted;   
     private String createdBy;
     private String updatedBy;

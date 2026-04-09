@@ -1,7 +1,6 @@
 package com.example.taskmanagement.dto.Response;
 
 import java.time.LocalDateTime;
-
 import com.example.taskmanagement.dto.Request.AssignedEmployeeDto;
 
 import lombok.Data;
@@ -19,7 +18,7 @@ public class TaskResponseDto {
     private String projectId;
     private Boolean isDeleted;
     private String milestoneId;
-    private AssignedEmployeeDto assignedTo;    
+    private EmployeeProjectSummaryResponseDto assignedTo;    
     private AssignedEmployeeDto assignedBy; 
 
 

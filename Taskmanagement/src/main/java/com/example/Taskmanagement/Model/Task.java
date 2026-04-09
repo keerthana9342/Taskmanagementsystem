@@ -9,7 +9,6 @@ import com.example.taskmanagement.dto.Request.AssignedEmployeeDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 @Data
 @Document(collection = "tasks")
 public class Task {

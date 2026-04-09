@@ -1,9 +1,8 @@
 package com.example.taskmanagement.Controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators.Add;
-import org.springframework.expression.spel.ast.Assign;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,15 +14,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taskmanagement.Model.Project;
 import com.example.taskmanagement.Service.ProjectService;
+import com.example.taskmanagement.dto.APIresponse;
+import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.MileStoneRequestDto;
 import com.example.taskmanagement.dto.Request.TaskRequestDto;
+import com.example.taskmanagement.dto.Response.EmployeeProjectSummaryResponseDto;
 import com.example.taskmanagement.dto.Response.MileStoneResponseDto;
+import com.example.taskmanagement.dto.Response.ProjectResposeDto;
+import com.example.taskmanagement.dto.Response.ProjectWithTasksDto;
 import com.example.taskmanagement.dto.Response.TaskResponseDto;
 
 
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {
@@ -38,10 +43,26 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.addProject(project));
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Project>> getAllProjects() {
-        return ResponseEntity.ok(projectService.getAllProjects());
-    }
+@GetMapping("/get")
+public ResponseEntity<APIresponse<PageResponse<ProjectResposeDto>>> getAllProjects(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String employeeId,
+        @RequestParam(required = false) String milestoneId,
+        @RequestParam(required = false) String startDate,
+        @RequestParam(required = false) String endDate) {
+
+    LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate) : null;
+    LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate) : null;
+
+    PageResponse<ProjectResposeDto> projects = projectService.getAllProjects(
+            keyword, status, employeeId, milestoneId, start, end, page, size);
+
+    return ResponseEntity.ok(new APIresponse<>("SUCCESS",
+            "Projects fetched successfully", projects, LocalDateTime.now()));
+}
 
     @GetMapping("/{projectId}")
     public ResponseEntity<Project> getProjectById(@PathVariable String projectId) {
@@ -100,8 +121,8 @@ public ResponseEntity<?> assignEmployees(
         return ResponseEntity.ok(projectService.getMilestoneById(projectId, milestoneId));
     }
 
-    // ✅ Task Endpoints
-// ✅ Task Endpoints
+    // Task Endpoints
+
 @PostMapping("/{projectId}/milestones/{milestoneId}/tasks")
 public ResponseEntity<TaskResponseDto> addTask(
         @PathVariable String projectId,
@@ -127,4 +148,17 @@ public ResponseEntity<List<TaskResponseDto>> getTasks(
         @PathVariable String milestoneId) {
     return ResponseEntity.ok(projectService.getTasksByMilestoneId(milestoneId));
 }
+ @GetMapping("/{projectId}/full")
+    //  returns project + all milestones + all tasks in one response
+    public ResponseEntity<ProjectWithTasksDto> getProjectFullDetail(
+            @PathVariable String projectId) {
+        return ResponseEntity.ok(projectService.getProjectFullDetail(projectId));
+    }
+    //  Get all tasks assigned to an employee across all projects
+@GetMapping("/employees/{employeeId}/tasks")
+public ResponseEntity<EmployeeProjectSummaryResponseDto> getEmployeeTaskSummary(
+        @PathVariable String employeeId) {
+    return ResponseEntity.ok(projectService.getEmployeeTaskSummary(employeeId));
+}
+
 }

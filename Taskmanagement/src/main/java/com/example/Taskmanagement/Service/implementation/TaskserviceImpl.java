@@ -17,33 +17,106 @@ import com.example.taskmanagement.Model.Task;
 import com.example.taskmanagement.Repository.EmployeeRepository;
 import com.example.taskmanagement.Repository.TaskRepository;
 import com.example.taskmanagement.Service.TaskService;
+import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.AssignedEmployeeDto;
 import com.example.taskmanagement.dto.Request.TaskRequestDto;
 import com.example.taskmanagement.dto.Response.TaskResponseDto;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 @Service
 public class TaskserviceImpl implements TaskService {
 
     private final TaskRepository taskrepo;
     private final EmployeeRepository employeeRepository;
+    private final MongoTemplate mongoTemplate;
 
-    public TaskserviceImpl(TaskRepository taskrepo, EmployeeRepository employeeRepository) {
+    public TaskserviceImpl(TaskRepository taskrepo, EmployeeRepository employeeRepository,MongoTemplate mongoTemplate) {
         this.taskrepo = taskrepo;
         this.employeeRepository = employeeRepository;
+        this.mongoTemplate = mongoTemplate;
     }
 
-    @Override
-    public List<TaskResponseDto> getAllTasks(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Task> taskPage = taskrepo.findAll(pageable);
+@Override
+public PageResponse<TaskResponseDto> getAllTasks(
+        String keyword,
+        String status,
+        String projectId,
+        String milestoneId,
+        String employeeId,
+        String designation,
+        LocalDateTime startDate,
+        LocalDateTime endDate,
+        int page,
+        int size) {
 
-        List<TaskResponseDto> responseList = new ArrayList<>();
-        for (Task task : taskPage.getContent()) {
-            responseList.add(TaskMapper.toDTO(task));
-        }
-        return responseList;
+    Pageable pageable = PageRequest.of(page, size);
+    Query query = new Query();
+    List<Criteria> criteriaList = new ArrayList<>();
+
+    //  Search keyword
+    if (keyword != null && !keyword.trim().isEmpty()) {
+        criteriaList.add(new Criteria().orOperator(
+                Criteria.where("title").regex(keyword, "i"),
+                Criteria.where("description").regex(keyword, "i"),
+                Criteria.where("status").regex(keyword, "i"),
+                Criteria.where("projectId").regex(keyword, "i"),
+                Criteria.where("milestoneId").regex(keyword, "i"),
+                Criteria.where("remarks").regex(keyword, "i"),
+                Criteria.where("assignedTo.employeeId").regex(keyword, "i"),
+                Criteria.where("assignedTo.username").regex(keyword, "i"),
+                Criteria.where("assignedTo.designation").regex(keyword, "i"),
+                Criteria.where("assignedBy.employeeId").regex(keyword, "i"),
+                Criteria.where("assignedBy.username").regex(keyword, "i")
+        ));
     }
 
+    //  Filters
+    if (status != null && !status.isEmpty()) {
+        criteriaList.add(Criteria.where("status").is(status));
+    }
+    if (projectId != null && !projectId.isEmpty()) {
+        criteriaList.add(Criteria.where("projectId").is(projectId));
+    }
+    if (milestoneId != null && !milestoneId.isEmpty()) {
+        criteriaList.add(Criteria.where("milestoneId").is(milestoneId));
+    }
+    if (employeeId != null && !employeeId.isEmpty()) {
+        criteriaList.add(Criteria.where("assignedTo.employeeId").is(employeeId));
+    }
+    if (designation != null && !designation.isEmpty()) {
+        criteriaList.add(Criteria.where("assignedTo.designation").is(designation));
+    }
+    if (startDate != null && endDate != null) {
+        criteriaList.add(Criteria.where("dueDate").gte(startDate).lte(endDate));
+    }
+
+    // Combine all criteria
+    if (!criteriaList.isEmpty()) {
+        query.addCriteria(new Criteria().andOperator(
+                criteriaList.toArray(new Criteria[0])));
+    }
+
+    //  Get total count
+    long total = mongoTemplate.count(query, Task.class);
+
+    //  Apply pagination
+    query.with(pageable);
+    List<Task> tasks = mongoTemplate.find(query, Task.class);
+
+    List<TaskResponseDto> taskDtos = tasks.stream()
+            .map(TaskMapper::toDTO)
+            .toList();
+
+    return new PageResponse<>(
+            taskDtos,
+            page,
+            size,
+            total,
+            (int) Math.ceil((double) total / size)
+    );
+}
     @Override
     public TaskResponseDto addTask(TaskRequestDto dto) {
 
@@ -150,13 +223,13 @@ public class TaskserviceImpl implements TaskService {
         Task task = taskrepo.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found: " + taskId));
 
-        // ✅ If COMPLETED
+        //  If COMPLETED
         if ("COMPLETED".equalsIgnoreCase(status)) {
             task.setStatus("COMPLETED");
             task.setCompletedDate(LocalDateTime.now());
             task.setRemarks(null);
 
-        // ✅ If OVERDUE - dueDate passed and not completed
+        // If OVERDUE - dueDate passed and not completed
         } else if (task.getDueDate().isBefore(LocalDateTime.now())) {
             task.setStatus("OVERDUE");
             task.setCompletedDate(null);
@@ -164,7 +237,7 @@ public class TaskserviceImpl implements TaskService {
                 task.setRemarks(remarks);
             }
 
-        // ✅ If PENDING or IN_PROGRESS
+        //  If PENDING or IN_PROGRESS
         } else {
             task.setStatus(status);
             task.setCompletedDate(null);
@@ -175,4 +248,5 @@ public class TaskserviceImpl implements TaskService {
 
         return TaskMapper.toDTO(taskrepo.save(task));
     }
+
 }

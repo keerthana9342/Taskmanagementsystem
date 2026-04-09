@@ -8,7 +8,7 @@ import com.example.taskmanagement.dto.Response.TaskResponseDto;
 
 public class TaskMapper {
 
-    // ✅ Request DTO → Entity
+    //  Request DTO → Entity
     public static Task toEntity(TaskRequestDto dto) {
         Task task = new Task();
         task.setTitle(dto.getTitle());
@@ -20,7 +20,7 @@ public class TaskMapper {
         task.setRemarks(dto.getRemarks());
         task.setIsDeleted(false);
 
-        // ✅ Map assignedTo from request body
+        //  Map assignedTo from request body
         if (dto.getAssignedTo() != null) {
             task.setAssignedTo(dto.getAssignedTo());
         }
@@ -28,7 +28,7 @@ public class TaskMapper {
         return task;
     }
 
-    // ✅ Entity → Response DTO
+    //  Entity → Response DTO
     public static TaskResponseDto toDTO(Task task) {
         if (task == null) return null;
 
@@ -44,10 +44,9 @@ public class TaskMapper {
         dto.setRemarks(task.getRemarks());
         dto.setIsDeleted(task.getIsDeleted());
 
-        // ✅ Map assignedTo
-        dto.setAssignedTo(task.getAssignedTo());
+        
 
-        // ✅ Map assignedBy (from token - already set in service)
+        // Map assignedBy (from token - already set in service)
         dto.setAssignedBy(task.getAssignedBy());
 
         return dto;

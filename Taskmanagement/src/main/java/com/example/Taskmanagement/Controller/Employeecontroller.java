@@ -1,7 +1,5 @@
 package com.example.taskmanagement.Controller;
 import java.time.LocalDateTime;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.taskmanagement.Service.EmployeeService;
 import com.example.taskmanagement.dto.APIresponse;
 import com.example.taskmanagement.dto.PageResponse;
-import com.example.taskmanagement.dto.Request.AssignTaskRequestDto;
 import com.example.taskmanagement.dto.Request.EmployeeRequestDto;
 import com.example.taskmanagement.dto.Response.EmployeeResponseDto;
 
@@ -43,24 +40,24 @@ public class Employeecontroller {
 @GetMapping("/get")
 public ResponseEntity<APIresponse<PageResponse<EmployeeResponseDto>>> getAllEmployees(
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String departmentId,
+        @RequestParam(required = false) String designation,
+        @RequestParam(required = false) String roleId) {
 
-    PageResponse<EmployeeResponseDto> employees =
-            employeeService.getAllEmployees(PageRequest.of(page, size));
+    PageResponse<EmployeeResponseDto> employees = employeeService.getAllEmployees(
+            keyword, status, departmentId, designation, roleId,
+            PageRequest.of(page, size));
 
-    APIresponse<PageResponse<EmployeeResponseDto>> response =
-            new APIresponse<>("SUCCESS",
-                    "Employees fetched successfully",
-                    employees,
-                    LocalDateTime.now());
-
-    return ResponseEntity.ok(response);
+    return ResponseEntity.ok(new APIresponse<>("SUCCESS",
+            "Employees fetched successfully", employees, LocalDateTime.now()));
 }
 @PutMapping("/update/{employeeId}")
 public ResponseEntity<?> updateEmployee(
         @PathVariable String employeeId,
         @RequestBody EmployeeRequestDto dto) {
-
     return ResponseEntity.ok(employeeService.updateEmployee(employeeId, dto));
 }
   
@@ -74,7 +71,6 @@ public ResponseEntity<?> hardDeleteEmployee(@PathVariable String employeeId) {
     return ResponseEntity.ok("Employee permanently deleted");
 }
 
-    
 }
 
     

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.taskmanagement.Service.TaskService;
 import com.example.taskmanagement.dto.APIresponse;
+import com.example.taskmanagement.dto.PageResponse;
 import com.example.taskmanagement.dto.Request.TaskRequestDto;
 import com.example.taskmanagement.dto.Response.TaskResponseDto;
 
@@ -41,15 +42,29 @@ public class Taskcontroller {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/get")
-    public ResponseEntity<APIresponse<List<TaskResponseDto>>> getalltask(
-            @RequestParam(defaultValue="0") int page,
-            @RequestParam(defaultValue="10") int size){
-        List<TaskResponseDto> tasks = taskservice.getAllTasks(page,size);
-        APIresponse<List<TaskResponseDto>> response =
-                new APIresponse<>("SUCCESS","All tasks fetched",tasks,LocalDateTime.now());
-        return ResponseEntity.ok(response);
-    }
+  @GetMapping("/get")
+public ResponseEntity<APIresponse<PageResponse<TaskResponseDto>>> getAllTasks(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) String projectId,
+        @RequestParam(required = false) String milestoneId,
+        @RequestParam(required = false) String employeeId,
+        @RequestParam(required = false) String designation,
+        @RequestParam(required = false) String startDate,
+        @RequestParam(required = false) String endDate) {
+
+    LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate) : null;
+    LocalDateTime end = endDate != null ? LocalDateTime.parse(endDate) : null;
+
+    PageResponse<TaskResponseDto> tasks = taskservice.getAllTasks(
+            keyword, status, projectId, milestoneId,
+            employeeId, designation, start, end, page, size);
+
+    return ResponseEntity.ok(new APIresponse<>("SUCCESS",
+            "Tasks fetched successfully", tasks, LocalDateTime.now()));
+}
 
     @GetMapping("/get/{id}")
     public ResponseEntity<APIresponse<TaskResponseDto>> gettaskbyid(@PathVariable String id){
