@@ -39,6 +39,4 @@ public class Employee {
     private String updatedBy;
     private LocalDate createdAt;
     private LocalDate updatedAt;
-    
-   
 }

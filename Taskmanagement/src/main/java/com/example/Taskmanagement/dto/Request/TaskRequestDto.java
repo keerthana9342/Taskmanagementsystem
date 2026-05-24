@@ -18,7 +18,7 @@ public class TaskRequestDto {
     private String description;
 
     @NotNull(message = "Status is required")
-    private String status;
+    private String status; 
 
     @NotNull(message = "Due date is required")
     @FutureOrPresent(message = "Due date must be present or future")
@@ -33,3 +33,4 @@ public class TaskRequestDto {
 
 }
 
+    
